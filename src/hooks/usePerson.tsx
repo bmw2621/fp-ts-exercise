@@ -11,20 +11,16 @@ const usePerson = (personId: number) => {
   const [error, setError] = useState<string>();
   const [person, setPerson] = useState<SwapiPerson>();
 
-  useEffect(
-    () => console.log({ isLoading, error, person }),
-    [error, isLoading, person],
-  );
-
   const toggleLoading: IO<void> = () => {
     setIsLoading((prev) => !prev);
   };
 
   const fetchPersonById = useCallback(
-    (id: number) =>
+    async (id: number) =>
       pipe(
         id,
         getPerson,
+        peek("inside hook"),
         map(
           fold(
             (e) => setError(e.message),
@@ -37,7 +33,7 @@ const usePerson = (personId: number) => {
 
   useEffect(() => {
     toggleLoading();
-    fetchPersonById(personId);
+    fetchPersonById(personId).finally(toggleLoading);
   }, [fetchPersonById, personId]);
 
   return {
